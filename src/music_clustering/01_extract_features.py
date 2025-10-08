@@ -1,8 +1,9 @@
 import os
-
+import joblib
 import librosa
 import numpy as np
 import pandas as pd
+import os, glob
 
 os.makedirs("data/input", exist_ok=True)
 
@@ -10,8 +11,8 @@ os.makedirs("data/input", exist_ok=True)
 def extract_beat_features(path: str):
     # metadata
     path_splits = os.path.split(path)
-    genre = path_splits[-2]
-    title = path_splits[-1].split(".")[0]
+    genre = os.path.split(path_splits[-2])[-1]
+    title = path_splits[-1].rstrip('.flac').split(".")[-1].strip()
 
     # features
     y, sr = librosa.load(path, sr=22050)
@@ -26,18 +27,20 @@ def extract_beat_features(path: str):
     mfcc_delta = librosa.feature.delta(mfcc)
     beat_mfcc_delta = librosa.util.sync(np.vstack([mfcc, mfcc_delta]), beat_frames)
 
-    beat_features = np.vstack([beat_chroma, beat_mfcc_delta]).tolist()
+    beat_features = np.vstack([beat_chroma, beat_mfcc_delta])
 
-    return {"genre": genre, "title": title, "features": beat_features}
+    return {"genre": genre, "title": title,
+            "features": beat_features,
+            # "beat_chroma": beat_chroma, "beat_mfcc_delta": beat_mfcc_delta,
+            }
 
 
 if __name__ == "__main__":
-    p1 = "data/source/Folk/01-02. Senbonzakura (Re-Recording).flac"
-    p2 = "data/source/Pop/01-03. Hotter Than Fire.flac"
+    files =glob.glob("data/source/*/*.flac")[:2]
 
-    f1 = extract_beat_features(p1)
-    f2 = extract_beat_features(p2)
+    data = []
+    for f in files:
+        data.append(extract_beat_features(f))
 
-    data = [f1, f2]
-
-    pd.DataFrame(data).to_parquet("data/input/beat_features.parquet", index=False)
+    df = pd.DataFrame(data)
+    joblib.dump(df, "data/input/beat_features.joblib")
