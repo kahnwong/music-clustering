@@ -40,7 +40,6 @@ def extract_beat_features(path: str):
         "genre": genre,
         "title": title,
         "features": beat_features,
-        # "beat_chroma": beat_chroma, "beat_mfcc_delta": beat_mfcc_delta,
     }
 
 

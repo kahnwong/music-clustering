@@ -32,7 +32,6 @@ def prepare_features(df):
 
 
 def perform_kmeans(features, n_clusters=4, random_state=42):
-    # Standardize features
     scaler = StandardScaler()
     features_scaled = scaler.fit_transform(features)
 
@@ -140,7 +139,7 @@ if __name__ == "__main__":
     features, labels, genres = prepare_features(df)
 
     # clustering
-    n_clusters = 4
+    n_clusters = 3
     kmeans, scaler, features_scaled = perform_kmeans(features, n_clusters=n_clusters)
 
     # get cluster assignments
